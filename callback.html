@@ -1,0 +1,23 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>밀크빈 카페24 인증</title>
+</head>
+<body>
+  <h2>밀크빈 카페24 인증</h2>
+  <p>인증 결과를 확인 중입니다.</p>
+  <p>Windows 프로그램 연결 기능은 아직 준비 중입니다.</p>
+  <script>
+    // OAuth 인증 정보는 외부 서버로 전송하지 않습니다.
+    // Windows 프로그램과의 연결은 추후 구현합니다.
+    document.querySelector("p").textContent =
+      new URLSearchParams(location.search).has("error")
+        ? "인증이 완료되지 않았습니다."
+        : "인증 페이지가 열렸습니다.";
+  </script>
+</body>
+</html>
