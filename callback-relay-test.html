@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-IPVPNhH0TdobLY4qDSQwmtQXsCKff203Q2O6Ib0pT0M='; base-uri 'none'; form-action 'none'">
+  <meta name="mb-oauth-relay-test" content="v1">
+  <title>밀크빈 콜백 전달 시험(실제 인증 아님)</title>
+</head>
+<body>
+  <h2>밀크빈 콜백 전달 시험</h2>
+  <p>이 페이지는 브라우저 호환성 시험용입니다. 실제 카페24 인증에 쓰지 않으며 가짜 값만 넣어 엽니다.</p>
+  <p id="msg">인증 결과를 확인 중입니다.</p>
+  <noscript><p>JavaScript 가 꺼져 있어 진행할 수 없습니다.</p></noscript>
+  <script>
+(function () {
+  "use strict";
+  // 카페24 인증 결과(code·state)를 외부 서버로 보내지 않고, 이 PC 의 디자인 관리자(127.0.0.1)로만 넘긴다.
+  // state = "<포트>.<무작위>" 는 디자인 관리자가 만든 값. 포트는 state 에서만 읽는다(고정 포트 없음).
+  var msg = document.getElementById("msg");
+  function stop(text) { msg.textContent = text; }
+  var p = new URLSearchParams(window.location.search);
+  try { history.replaceState(null, "", window.location.pathname); } catch (e) {}  // 주소창·방문 기록에서 인증코드 제거
+  var states = p.getAll("state"), codes = p.getAll("code"), errors = p.getAll("error");
+  if (states.length !== 1 || codes.length > 1 || errors.length > 1) {
+    return stop("인증 응답 형식이 올바르지 않습니다. 디자인 관리자에서 다시 시작하세요.");
+  }
+  var m = /^(\d{4,5})\.[A-Za-z0-9_-]{32,128}$/.exec(states[0]);
+  var port = m ? Number(m[1]) : 0;
+  if (port < 1024 || port > 65535) {
+    return stop("디자인 관리자에서 시작한 인증이 아닙니다. 이 창을 닫으세요.");
+  }
+  var out = new URLSearchParams();
+  out.set("state", states[0]);
+  if (errors.length) {
+    out.set("error", errors[0].slice(0, 100));
+  } else if (codes.length && /^[A-Za-z0-9_.~-]{1,512}$/.test(codes[0])) {
+    out.set("code", codes[0]);
+  } else {
+    return stop("인증코드가 없거나 형식이 올바르지 않습니다. 디자인 관리자에서 다시 시작하세요.");
+  }
+  stop("디자인 관리자(이 PC)로 넘기는 중입니다. 화면이 바뀌지 않으면 디자인 관리자가 대기 중인지 확인하세요.");
+  window.location.replace("http://127.0.0.1:" + port + "/cb?" + out.toString());
+})();
+  </script>
+</body>
+</html>
